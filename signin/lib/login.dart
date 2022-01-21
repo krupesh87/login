@@ -1,8 +1,8 @@
 
 
-// import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-// import 'package:fluttertoast/fluttertoast.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 
 class MyLogin extends StatefulWidget {
@@ -13,7 +13,7 @@ class MyLogin extends StatefulWidget {
 }
 
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
-  //  final _auth=FirebaseAuth.instance;
+   final _auth=FirebaseAuth.instance;
    final TextEditingController passwordcontroller=TextEditingController();
    final TextEditingController emailcontroller=TextEditingController();
 class _MyLoginState extends State<MyLogin> {
@@ -127,7 +127,9 @@ class _MyLoginState extends State<MyLogin> {
                               backgroundColor: Color(0xff4c505b),
                               child:IconButton(
                                 color: Colors.white,
-                                onPressed: (){},//
+                                onPressed: (){
+                                  signIn(emailcontroller.text, passwordcontroller.text);
+                                },//
                                 icon: Icon(Icons.arrow_forward),
 
                               )
@@ -178,18 +180,18 @@ class _MyLoginState extends State<MyLogin> {
 }
 
 //login function
-// void signIn(String email,String password) async {
-//   if(formKey.currentState!.validate()){
-//     await _auth
-//     .signInWithEmailAndPassword(email:email,password:password)
-//     .then((uid)=>{
-//       Fluttertoast.showToast(msg: "SuccessFul"),
+void signIn(String email,String password) async {
+  if(formKey.currentState!.validate()){
+    await _auth
+    .signInWithEmailAndPassword(email:email,password:password)
+    .then((uid)=>{
+      Fluttertoast.showToast(msg: "SuccessFul"),
    
-//     }).catchError((e)=>{
-//        Fluttertoast.showToast(msg: e!.message)
+    }).catchError((e)=>{
+       Fluttertoast.showToast(msg: e!.message)
 
-//     }
+    }
      
-//     );
-//   }
-// }
+    );
+  }
+}

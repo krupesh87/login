@@ -1,13 +1,22 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:form_field_validator/form_field_validator.dart';
+import 'package:signin/login.dart';
+import 'package:signin/model/usermodel.dart';
 
 class MyRegister extends StatefulWidget {
   const MyRegister({Key? key}) : super(key: key);
-
+ 
   @override
   _MyRegisterState createState() => _MyRegisterState();
 }
-
+final _auth=FirebaseAuth.instance;
+ final TextEditingController emailcontroller=TextEditingController();
+ final TextEditingController namecontroller=TextEditingController();
+ final TextEditingController passwordcontroller=TextEditingController();
+ final TextEditingController confirmcontroller=TextEditingController();
 class _MyRegisterState extends State<MyRegister> {
    GlobalKey<FormState> formKey = GlobalKey<FormState>();
   @override
@@ -50,6 +59,10 @@ class _MyRegisterState extends State<MyRegister> {
                         child: Column(
                           children: [
                             TextFormField(
+                               controller:namecontroller,
+                               onSaved: (newValue) {
+                                 namecontroller.text=newValue!;
+                               },
                               validator: MultiValidator(
                                 [
                                   RequiredValidator(errorText: "Required"),
@@ -60,6 +73,7 @@ class _MyRegisterState extends State<MyRegister> {
                               ),
                               style: TextStyle(color: Colors.white),
                               decoration: InputDecoration(
+                               
                                   enabledBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(10),
                                     borderSide: BorderSide(
@@ -83,6 +97,10 @@ class _MyRegisterState extends State<MyRegister> {
                               height: 30,
                             ),
                             TextFormField(
+                              controller: emailcontroller,
+                              onSaved: (newValue) {
+                                emailcontroller.text=newValue!;
+                              },
                               validator: MultiValidator(
                                 [
                                   RequiredValidator(errorText: "Required"),
@@ -114,6 +132,10 @@ class _MyRegisterState extends State<MyRegister> {
                               height: 30,
                             ),
                             TextFormField(
+                              controller: passwordcontroller,
+                              onSaved: (newValue) {
+                                passwordcontroller.text=newValue!;
+                              },
                               onChanged: (val) => password = val, 
                               validator:  MultiValidator(
                           [
@@ -152,9 +174,13 @@ class _MyRegisterState extends State<MyRegister> {
                               height: 40,
                             ),
                             TextFormField(
+                              controller: confirmcontroller,
+                              onSaved: (newValue) {
+                                confirmcontroller.text=newValue!;
+                              },
                               validator: (val) {
                               
-                                return MatchValidator(errorText: 'passwords do not match').validateMatch(val!, password);
+                                return MatchValidator(errorText: 'passwords do not match').validateMatch(val!, passwordcontroller.text);
                               },
                               style: TextStyle(color: Colors.white),
                               obscureText: true,
@@ -195,7 +221,9 @@ class _MyRegisterState extends State<MyRegister> {
                                   backgroundColor: Color(0xff4c505b),
                                   child: IconButton(
                                       color: Colors.white,
-                                      onPressed: () {},
+                                      onPressed: () {
+                                        signup(emailcontroller.text, passwordcontroller.text);
+                                      },
                                       icon: Icon(
                                         Icons.arrow_forward,
                                       )),
@@ -237,4 +265,41 @@ class _MyRegisterState extends State<MyRegister> {
       ),
     );
   }
+
+
+
+
+
+
+void signup(String email,String password) async{
+  print("hii");
+  if(formKey.currentState!.validate()){
+    await _auth.createUserWithEmailAndPassword(email: email, password: password)
+    .then((value) =>{
+      
+
+    postDetailToFirestore()})
+    .catchError((e){
+      Fluttertoast.showToast(msg: e!.message);
+    });
+  }
+  }
+  void postDetailToFirestore() async{
+    print("h1 tag");
+    FirebaseFirestore firebaseFirestore=FirebaseFirestore.instance;
+    User?user=_auth.currentUser;
+    UserModel userModel=UserModel();
+    userModel.email=user!.email;
+    userModel.uid=user.uid;
+    userModel.password=passwordcontroller.text;
+  
+
+
+
+    await firebaseFirestore.collection("users").doc(user.uid).set(userModel.toMap());
+    Fluttertoast.showToast(msg: "created successful");
+    Navigator.pushNamed(context, 'login');
+
+ 
+}
 }
